@@ -48,6 +48,49 @@ let register = async (req, res, next) => {
     }
 }
 
+let login = async (req, res, next) => {
+    try {
+        let { email, password } = req.body;
+
+        let user = await db.query("SELECT * FROM users WHERE email = $1", [email]);
+        let userObj = user.rows[0];
+
+        if ( !userObj ) {
+            return res.json({
+                status: 'error',
+                data: {
+                    message:'Invalid email'
+                }
+            })
+        }
+
+        let hashedPassword = await bcrypt.compare(password, userObj.password);
+        
+        if ( !hashedPassword ) {
+            return res.json({
+                status: 'error',
+                data: {
+                    message:'Incorrect password'
+                }
+            })
+        }
+
+        let { id, firstname, lastname, isadmin } = userObj;
+        let userToken = { id, firstname, lastname, email, isadmin };
+        let token = jwt.sign(userToken, SECRETE_KEY);
+
+        return res.json({
+            status: 'success',
+            data: {
+                token
+            }
+        })
+    }
+    catch (e) {
+        return next(e);
+    }
+}
+
 module.exports = {
-    getUsers, register
+    getUsers, register, login
 };
