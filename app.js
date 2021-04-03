@@ -1,6 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
+const router = require("./routes");
 
 const PORT = process.env.PORT
 const app = express();
@@ -11,6 +12,8 @@ app.use(express.json());
 app.get("/", (req, res) => {
     return res.send("Welcome to Andela Project: iReporter");
 })
+
+app.use("/api", router);
 
 app.use((req, res, next) => {
     let error = new Error("Page Not Found");

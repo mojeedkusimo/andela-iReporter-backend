@@ -1,0 +1,1 @@
+## All Endpoints can be tested here: https://mojeedkusimo-andela-ireporter.herokuapp.com/ and check documentation to test each endpoint
