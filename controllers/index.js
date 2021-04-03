@@ -26,7 +26,7 @@ let register = async (req, res, next) => {
         let saltRound = 7;
         const hashedPassword = await bcrypt.hash(password, saltRound);
         const createUser = await db.query("INSERT INTO users (firstname, lastname, email, phone_number, password, isadmin, date_registered) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *", 
-        [firstname, lastname, email, phoneNumber, hashedPassword, isadmin, dateRegistered]);
+        [firstname, lastname, email, phoneNumber, hashedPassword, isadmin, dateRegistered.rows[0].now]);
 
         const userObj = createUser.rows[0];
         const { id } = userObj;
