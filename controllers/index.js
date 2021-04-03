@@ -22,11 +22,11 @@ let getUsers = async (req, res, next) => {
 let register = async (req, res, next) => {
     try {
         const { firstname, lastname, email, phoneNumber, password, isadmin } = req.body;
-
+        let dateRegistered = await db.query('SELECT NOW()');
         let saltRound = 7;
         const hashedPassword = await bcrypt.hash(password, saltRound);
-        const createUser = await db.query("INSERT INTO users (firstname, lastname, email, phone_number, password, isadmin) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *", 
-        [firstname, lastname, email, phoneNumber, hashedPassword, isadmin]);
+        const createUser = await db.query("INSERT INTO users (firstname, lastname, email, phone_number, password, isadmin, date_registered) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *", 
+        [firstname, lastname, email, phoneNumber, hashedPassword, isadmin, dateRegistered]);
 
         const userObj = createUser.rows[0];
         const { id } = userObj;
