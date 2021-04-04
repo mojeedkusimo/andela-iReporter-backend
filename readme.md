@@ -1,1 +1,1 @@
-## All Endpoints can be tested here: https://mojeedkusimo-andela-ireporter.herokuapp.com/ and check documentation to test each endpoint
+## All Endpoints are hosted on Heroku and can be tested [here](https://mojeedkusimo-andela-ireporter.herokuapp.com/)

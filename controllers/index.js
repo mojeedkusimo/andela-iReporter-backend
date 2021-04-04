@@ -112,7 +112,7 @@ let postReport = async (req, res, next) => {
 
 let getAllReports = async (req, res, next) => {
     try {
-        let allReports = await db.query("SELECT r.id, r.title, r.context, u.firstname, r.type, r.status, r.created_on FROM reports r join users u ON r.created_by = u.id order by r.id desc");
+        let allReports = await db.query("SELECT r.id, r.title, r.context, u.firstname, r.type, r.status, r.created_on FROM reports r join users u ON r.created_by = u.id order by r.created_on desc");
     
         return res.json({
             status: "success",
@@ -142,6 +142,41 @@ let getReport = async (req, res, next) => {
     }
 }
 
+let deleteReport = async (req, res, next) => {
+    try {
+        let report = await db.query("DELETE FROM reports WHERE id=$1", [req.params.id]);
+
+        return res.json({
+            status: "success",
+            data: {
+                message: "Report successfully deleted"
+            }
+        });
+    }
+    catch (e) {
+        return next(e);
+    }
+}
+
+let editReport = async (req, res, next) => {
+    try {
+        let { title, context } = req.body;
+        let createdOn = await db.query('SELECT NOW()');
+
+        await db.query("UPDATE reports SET title=$1, context=$2, created_on=$3 WHERE id=$4", [ title, context, createdOn.rows[0].now, req.params.id ]);
+
+        return res.json({
+            status: "success",
+            data: {
+                message: "Report successfully updated"
+            }
+        });
+    }
+    catch (e) {
+        return next(e);
+    }
+}
+
 module.exports = {
-    getUsers, register, login, postReport, getAllReports, getReport
+    getUsers, register, login, postReport, getAllReports, getReport, deleteReport, editReport
 };

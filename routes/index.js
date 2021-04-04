@@ -1,11 +1,13 @@
 const router = require("express").Router();
-const { getUsers, register, login, postReport, getAllReports, getReport } = require("../controllers");
+const { getUsers, register, login, postReport, getAllReports, getReport, deleteReport, editReport } = require("../controllers");
 
 router.get("/users", getUsers)
       .get("/all-reports", getAllReports)
       .get("/view-report/:id", getReport)
+      .patch("/view-report/:id", editReport)
       .post("/auth/register", register)
       .post("/new-report", postReport)
-      .post("/auth/login", login);
+      .post("/auth/login", login)
+      .delete("/view-report/:id", deleteReport);
 
 module.exports = router;
