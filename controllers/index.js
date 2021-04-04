@@ -91,6 +91,57 @@ let login = async (req, res, next) => {
     }
 }
 
+let postReport = async (req, res, next) => {
+    try {
+        let { user_id, title, context, type, status } = req.body;
+
+        let createdOn = await db.query('SELECT NOW()');
+        let reportPost = await db.query('INSERT INTO reports (title, context, created_by, created_on, type, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [title, context, user_id, createdOn.rows[0].now, type, status]);
+
+        return res.json({
+            status: "success",
+            data: {
+                message: "Report successfully posted"
+            }
+        })
+    }
+    catch (e) {
+        return next(e);
+    }
+}
+
+let getAllReports = async (req, res, next) => {
+    try {
+        let allReports = await db.query("SELECT r.id, r.title, r.context, u.firstname, r.type, r.status, r.created_on FROM reports r join users u ON r.created_by = u.id order by r.id desc");
+    
+        return res.json({
+            status: "success",
+            data: {
+                message: [allReports.rows]
+            }
+        });
+    }
+    catch (e) {
+        return next(e);
+    }
+}
+
+let getReport = async (req, res, next) => {
+    try {
+        let report = await db.query("SELECT u.firstname, r.* FROM reports r join users u ON u.id = r.created_by WHERE r.id=$1", [req.params.id]);
+
+        return res.json({
+            status: "success",
+            data: {
+                message: report.rows[0]
+            }
+        });
+    }
+    catch (e) {
+        return next(e);
+    }
+}
+
 module.exports = {
-    getUsers, register, login
+    getUsers, register, login, postReport, getAllReports, getReport
 };
