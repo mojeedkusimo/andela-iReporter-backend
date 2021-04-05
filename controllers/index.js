@@ -3,6 +3,9 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const SECRETE_KEY = process.env.SECRETE_KEY;
+const FULLNAME = process.env.FULLNAME;
+const PHONE_NUMBER = process.env.PHONE_NUMBER;
+const nodemailer = require("nodemailer");
 
 let getUsers = async (req, res, next) => {
     try {
@@ -182,6 +185,40 @@ let editReport = async (req, res, next) => {
             await db.query("UPDATE reports SET title=$1, context=$2, created_on=$3 WHERE id=$4", [ title, context, createdOn.rows[0].now, req.params.id ]);
         } else {
             await db.query("UPDATE reports SET status=$1,created_on=$2 WHERE id=$3", [ status, createdOn.rows[0].now, req.params.id ]);
+
+            let userInfo = await db.query("SELECT u.firstname, r.title, r.status FROM users u JOIN reports r ON u.id = r.created_by WHERE r.id=$1", [req.params.id]);
+            let userObj = userInfo.rows[0];
+
+            let transporter = nodemailer.createTransport({
+                host: "smtp.gmail.com",
+                port: 587,
+                secure: false,
+                auth: {
+                    user: FULLNAME,
+                    pass: PHONE_NUMBER
+                },
+              });
+        
+              let info = await transporter.sendMail({
+                from: '"Mojeed Kusimo" <mkusimo90@gmail.com>',
+                to: "mkusimo90@gmail.com",
+                subject: "Status Update from iReporter",
+                text: `Dear ${userObj.firstname},
+                    This is to notify you that your report on ${userObj.title} has been updated to ${userObj.status}.
+                    Thank you for using our platform, we shall keep you updated.
+
+                    Best regards,
+                    Mojeed A. Kusimo.
+                `,
+                html: `<h3>Dear ${userObj.firstname},</h3>
+                <p>This is to notify you that your report on <b><i>${userObj.title}</i></b> has been updated to <b><i>${userObj.status}</i></b>.</p>
+                <p>Thank you for using our platform, we shall keep you updated.</p>
+
+                <p>Best regards,</p>
+                <h3><b>Mojeed A. Kusimo.</b></h3>
+                <h3><b>Developer, iReporter</b></h3>
+                `,
+              });
         }
 
         return res.json({
@@ -223,6 +260,7 @@ let getUserReports = async (req, res, next) => {
         return next(e);
     }
 }
+
 
 module.exports = {
     getUsers, register, login, postReport, getAllReports, getReport, deleteReport, editReport, getUserReports
