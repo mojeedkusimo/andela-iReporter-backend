@@ -113,11 +113,25 @@ let postReport = async (req, res, next) => {
 let getAllReports = async (req, res, next) => {
     try {
         let allReports = await db.query("SELECT r.id, r.title, r.context, u.firstname, r.type, r.status, r.created_on FROM reports r join users u ON r.created_by = u.id order by r.created_on desc");
+        let allReportsCount = await db.query("SELECT COUNT(*) FROM reports");
+        let openCount = await db.query("SELECT COUNT(*) FROM reports WHERE status='open'");
+        let underIvestigationCount = await db.query("SELECT COUNT(*) FROM reports WHERE status='under investigation'");
+        let rejectedCount = await db.query("SELECT COUNT(*) FROM reports WHERE status='rejected'");
+        let resolvedCount = await db.query("SELECT COUNT(*) FROM reports WHERE status='resolved'");
+        // let redFlagCount = await db.query("SELECT COUNT(*) FROM reports WHERE type='resolved'");
+        // let interventionCount = await db.query("SELECT COUNT(*) FROM reports WHERE status='resolved'");
     
         return res.json({
             status: "success",
             data: {
-                message: [allReports.rows]
+                message: [allReports.rows],
+                count: {
+                    allReports: allReportsCount.rows[0].count,
+                    open: openCount.rows[0].count,
+                    underInvestigation: underIvestigationCount.rows[0].count,
+                    rejected: rejectedCount.rows[0].count,
+                    resolved: resolvedCount.rows[0].count                    
+                }
             }
         });
     }
@@ -129,6 +143,7 @@ let getAllReports = async (req, res, next) => {
 let getReport = async (req, res, next) => {
     try {
         let report = await db.query("SELECT u.firstname, r.* FROM reports r join users u ON u.id = r.created_by WHERE r.id=$1", [req.params.id]);
+
 
         return res.json({
             status: "success",
@@ -160,10 +175,14 @@ let deleteReport = async (req, res, next) => {
 
 let editReport = async (req, res, next) => {
     try {
-        let { title, context } = req.body;
+        let { title, context, status } = req.body;
         let createdOn = await db.query('SELECT NOW()');
 
-        await db.query("UPDATE reports SET title=$1, context=$2, created_on=$3 WHERE id=$4", [ title, context, createdOn.rows[0].now, req.params.id ]);
+        if (title !== undefined && context !== undefined) {
+            await db.query("UPDATE reports SET title=$1, context=$2, created_on=$3 WHERE id=$4", [ title, context, createdOn.rows[0].now, req.params.id ]);
+        } else {
+            await db.query("UPDATE reports SET status=$1,created_on=$2 WHERE id=$3", [ status, createdOn.rows[0].now, req.params.id ]);
+        }
 
         return res.json({
             status: "success",
@@ -177,6 +196,34 @@ let editReport = async (req, res, next) => {
     }
 }
 
+let getUserReports = async (req, res, next) => {
+    try {
+        let allReports = await db.query("SELECT r.id, r.title, r.context, u.firstname, r.type, r.status, r.created_on FROM reports r join users u ON r.created_by = u.id  WHERE r.created_by=$1 order by r.created_on desc", [req.params.id]);
+        let allReportsCount = await db.query("SELECT COUNT(*) FROM reports WHERE created_by=$1", [req.params.id]);
+        let openCount = await db.query("SELECT COUNT(*) FROM reports WHERE status='open' and created_by=$1", [req.params.id]);
+        let underIvestigationCount = await db.query("SELECT COUNT(*) FROM reports WHERE status='under investigation' and created_by=$1", [req.params.id]);
+        let rejectedCount = await db.query("SELECT COUNT(*) FROM reports WHERE status='rejected' and created_by=$1", [req.params.id]);
+        let resolvedCount = await db.query("SELECT COUNT(*) FROM reports WHERE status='resolved' and created_by=$1", [req.params.id]);
+    
+        return res.json({
+            status: "success",
+            data: {
+                message: [allReports.rows],
+                count: {
+                    allReports: allReportsCount.rows[0].count,
+                    open: openCount.rows[0].count,
+                    underInvestigation: underIvestigationCount.rows[0].count,
+                    rejected: rejectedCount.rows[0].count,
+                    resolved: resolvedCount.rows[0].count                    
+                }
+            }
+        });
+    }
+    catch (e) {
+        return next(e);
+    }
+}
+
 module.exports = {
-    getUsers, register, login, postReport, getAllReports, getReport, deleteReport, editReport
+    getUsers, register, login, postReport, getAllReports, getReport, deleteReport, editReport, getUserReports
 };
