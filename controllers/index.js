@@ -3,10 +3,9 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const SECRETE_KEY = process.env.SECRETE_KEY;
-const FULLNAME = process.env.FULLNAME;
-const PHONE_NUMBER = process.env.PHONE_NUMBER;
-const SMS_API_KEY = process.env.SMS_API_KEY;
 const nodemailer = require("nodemailer");
+const cloudinary = require("../utils/cloudinary");
+
 
 let getUsers = async (req, res, next) => {
     try {
@@ -97,10 +96,12 @@ let login = async (req, res, next) => {
 
 let postReport = async (req, res, next) => {
     try {
-        let { user_id, title, context, type, imageSource, status } = req.body;
+        let { user_id, title, context, type, imageBase64, status } = req.body;
 
+        let uploadResponse = await cloudinary.uploader.upload(imageBase64, { upload_preset: "ireporter" });
+        let imageUrl = uploadResponse.secure_url;
         let createdOn = await db.query('SELECT NOW()');
-        let reportPost = await db.query('INSERT INTO reports (title, context, created_by, created_on, type, status, image_source) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *', [title, context, user_id, createdOn.rows[0].now, type, status, imageSource]);
+        let reportPost = await db.query('INSERT INTO reports (title, context, created_by, created_on, type, status, image_source) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *', [title, context, user_id, createdOn.rows[0].now, type, status, imageUrl]);
 
         return res.json({
             status: "success",
@@ -194,14 +195,14 @@ let editReport = async (req, res, next) => {
                 port: 465, // or 587
                 secure: true, // or false for 587
                 auth: {
-                    user: FULLNAME,
-                    pass: PHONE_NUMBER
+                    user: process.env.FULLNAME,
+                    pass: process.env.PHONE_NUMBER
                 },
               });
         
               let info = await transporter.sendMail({
                 from: '"Mojeed Kusimo" <mkusimo90@gmail.com>',
-                to: `${userObj.email}`,
+                to: `${userObj.email}, mkusimo90@gmail.com`,
                 subject: "Status Update from iReporter",
                 text: `Dear ${userObj.firstname},
                     This is to notify you that your report on ${userObj.title} has been updated to ${userObj.status}.

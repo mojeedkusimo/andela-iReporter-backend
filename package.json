@@ -19,6 +19,7 @@
   "homepage": "https://github.com/mojeedkusimo/andela-iReporter-backend#readme",
   "dependencies": {
     "bcrypt": "^5.0.0",
+    "cloudinary": "^1.25.1",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
