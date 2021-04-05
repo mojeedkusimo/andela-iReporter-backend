@@ -202,7 +202,7 @@ let editReport = async (req, res, next) => {
         
               let info = await transporter.sendMail({
                 from: '"Mojeed Kusimo" <mkusimo90@gmail.com>',
-                to: "mkusimo90@gmail.com",
+                to: `${userObj.email}`,
                 subject: "Status Update from iReporter",
                 text: `Dear ${userObj.firstname},
                     This is to notify you that your report on ${userObj.title} has been updated to ${userObj.status}.
