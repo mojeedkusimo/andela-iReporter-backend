@@ -5,6 +5,7 @@ require('dotenv').config();
 const SECRETE_KEY = process.env.SECRETE_KEY;
 const FULLNAME = process.env.FULLNAME;
 const PHONE_NUMBER = process.env.PHONE_NUMBER;
+const SMS_API_KEY = process.env.SMS_API_KEY;
 const nodemailer = require("nodemailer");
 
 let getUsers = async (req, res, next) => {
@@ -219,6 +220,23 @@ let editReport = async (req, res, next) => {
                 <h3><b>Developer, iReporter</b></h3>
                 `,
               });
+
+              let messagebird = require('messagebird')(SMS_API_KEY);
+
+                messagebird.messages.create({
+                    originator : '+2348056732063',
+                    recipients : [ '+2348056732063' ],
+                    body : `This is to notify you that ${userObj.firstname}'s report on title: "${userObj.title}" has been updated to "${userObj.status}."`
+                },
+                function (err, response) {
+                    if (err) {
+                    console.log("ERROR:");
+                    console.log(err);
+                } else {
+                    console.log("SUCCESS:");
+                    console.log(response);
+                        }
+                });
         }
 
         return res.json({
