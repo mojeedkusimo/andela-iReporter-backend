@@ -187,7 +187,7 @@ let editReport = async (req, res, next) => {
         } else {
             await db.query("UPDATE reports SET status=$1,created_on=$2 WHERE id=$3", [ status, createdOn.rows[0].now, req.params.id ]);
 
-            let userInfo = await db.query("SELECT u.firstname, r.title, r.status FROM users u JOIN reports r ON u.id = r.created_by WHERE r.id=$1", [req.params.id]);
+            let userInfo = await db.query("SELECT u.firstname, u.email, r.title, r.status FROM users u JOIN reports r ON u.id = r.created_by WHERE r.id=$1", [req.params.id]);
             let userObj = userInfo.rows[0];
 
             let transporter = nodemailer.createTransport({
@@ -217,7 +217,7 @@ let editReport = async (req, res, next) => {
 
                 <p>Best regards,</p>
                 <h3><b>Mojeed A. Kusimo.</b></h3>
-                <h3><b>Developer, iReporter</b></h3>
+                <h3><b>Softare Developer, iReporter</b></h3>
                 `,
               });
 
