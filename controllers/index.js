@@ -97,15 +97,15 @@ let login = async (req, res, next) => {
 
 let postReport = async (req, res, next) => {
     try {
-        let { user_id, title, context, type, status } = req.body;
+        let { user_id, title, context, type, imageSource, status } = req.body;
 
         let createdOn = await db.query('SELECT NOW()');
-        let reportPost = await db.query('INSERT INTO reports (title, context, created_by, created_on, type, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [title, context, user_id, createdOn.rows[0].now, type, status]);
+        let reportPost = await db.query('INSERT INTO reports (title, context, created_by, created_on, type, status, image_source) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *', [title, context, user_id, createdOn.rows[0].now, type, status, imageSource]);
 
         return res.json({
             status: "success",
             data: {
-                message: "Report successfully posted"
+                message: "Report successfully posted" 
             }
         })
     }
@@ -122,8 +122,7 @@ let getAllReports = async (req, res, next) => {
         let underIvestigationCount = await db.query("SELECT COUNT(*) FROM reports WHERE status='under investigation'");
         let rejectedCount = await db.query("SELECT COUNT(*) FROM reports WHERE status='rejected'");
         let resolvedCount = await db.query("SELECT COUNT(*) FROM reports WHERE status='resolved'");
-        // let redFlagCount = await db.query("SELECT COUNT(*) FROM reports WHERE type='resolved'");
-        // let interventionCount = await db.query("SELECT COUNT(*) FROM reports WHERE status='resolved'");
+
     
         return res.json({
             status: "success",
@@ -186,14 +185,14 @@ let editReport = async (req, res, next) => {
             await db.query("UPDATE reports SET title=$1, context=$2, created_on=$3 WHERE id=$4", [ title, context, createdOn.rows[0].now, req.params.id ]);
         } else {
             await db.query("UPDATE reports SET status=$1,created_on=$2 WHERE id=$3", [ status, createdOn.rows[0].now, req.params.id ]);
-
+ 
             let userInfo = await db.query("SELECT u.firstname, u.email, r.title, r.status FROM users u JOIN reports r ON u.id = r.created_by WHERE r.id=$1", [req.params.id]);
             let userObj = userInfo.rows[0];
 
             let transporter = nodemailer.createTransport({
                 host: "smtp.gmail.com",
-                port: 587,
-                secure: false,
+                port: 465, // or 587
+                secure: true, // or false for 587
                 auth: {
                     user: FULLNAME,
                     pass: PHONE_NUMBER
@@ -220,23 +219,22 @@ let editReport = async (req, res, next) => {
                 <h3><b>Softare Developer, iReporter</b></h3>
                 `,
               });
+            //   let messagebird = require('messagebird')(SMS_API_KEY);
 
-              let messagebird = require('messagebird')(SMS_API_KEY);
-
-                messagebird.messages.create({
-                    originator : '+2348056732063',
-                    recipients : [ '+2348056732063' ],
-                    body : `This is to notify you that ${userObj.firstname}'s report on title: "${userObj.title}" has been updated to "${userObj.status}."`
-                },
-                function (err, response) {
-                    if (err) {
-                    console.log("ERROR:");
-                    console.log(err);
-                } else {
-                    console.log("SUCCESS:");
-                    console.log(response);
-                        }
-                });
+            //     messagebird.messages.create({
+            //         originator : '+2348056732063',
+            //         recipients : [ '+2348056732063' ],
+            //         body : `This is to notify you that ${userObj.firstname}'s report on title: "${userObj.title}" has been updated to "${userObj.status}."`
+            //     },
+            //     function (err, response) {
+            //         if (err) {
+            //         console.log("ERROR:");
+            //         console.log(err);
+            //     } else {
+            //         console.log("SUCCESS:");
+            //         console.log(response);
+            //             }
+            //     });
         }
 
         return res.json({
@@ -247,6 +245,7 @@ let editReport = async (req, res, next) => {
         });
     }
     catch (e) {
+        console.log(e);
         return next(e);
     }
 }
