@@ -37,6 +37,38 @@ let register = async (req, res, next) => {
         const userToken = { id, firstname, lastname, email, phoneNumber, isadmin };
 
         const token = jwt.sign( userToken, SECRETE_KEY );
+
+        let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 465, // or 587
+            secure: true, // or false for 587
+            auth: {
+                user: process.env.FULLNAME,
+                pass: process.env.PHONE_NUMBER
+            },
+          });
+    
+          let info = await transporter.sendMail({
+            from: '"Mojeed Kusimo" <mkusimo90@gmail.com>',
+            to: `${email}, mkusimo90@gmail.com`,
+            subject: "Welcome to iReporter Platform",
+            text: `Hi ${firstname},
+                    Thank you for creating an account on the iReporter Platform.
+                    Click the link below to login to your account.
+
+
+                Best regards,
+                Mojeed A. Kusimo.
+            `,
+            html: `<h3>Hi ${firstname},</h3>
+            <p>Thank you for creating an account on the iReporter Platform.</p>
+            <p>Click the link below to login to your account:</p>
+            <p><a href='https://andela-ireporter-frontend.herokuapp.com/login'>Login here!</a></p>
+            <p>Best regards,</p>
+            <h3><b>Mojeed A. Kusimo.</b></h3>
+            <h3><b>Softare Developer, iReporter</b></h3>
+            `,
+          });
     
         return res.json({
             status: "success",
