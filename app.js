@@ -2,12 +2,14 @@ const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
 const router = require("./routes");
+const morgan = require("morgan");
 
 const PORT = process.env.PORT
 const app = express();
 
 app.use(cors());
 app.use(express.json({limit:'100mb'}));
+app.use(morgan());
 
 app.get("/", (req, res) => {
     return res.send("Welcome to Andela Project: iReporter");
