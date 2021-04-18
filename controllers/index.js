@@ -5,6 +5,7 @@ require('dotenv').config();
 const SECRETE_KEY = process.env.SECRETE_KEY;
 const nodemailer = require("nodemailer");
 const cloudinary = require("../utils/cloudinary");
+const geoloc = require("../utils/geoloc");
 
 
 let getUsers = async (req, res, next) => {
@@ -128,12 +129,16 @@ let login = async (req, res, next) => {
 
 let postReport = async (req, res, next) => {
     try {
-        let { user_id, title, context, type, imageBase64, status } = req.body;
+        let { user_id, title, context, type, imageBase64, status, address } = req.body;
 
+        let coordinates = await geoloc.geocode({
+            address,
+            country: "Nigeria"
+        });
         let uploadResponse = await cloudinary.uploader.upload(imageBase64, { upload_preset: "ireporter" });
         let imageUrl = uploadResponse.secure_url;
         let createdOn = await db.query('SELECT NOW()');
-        let reportPost = await db.query('INSERT INTO reports (title, context, created_by, created_on, type, status, image_source) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *', [title, context, user_id, createdOn.rows[0].now, type, status, imageUrl]);
+        let reportPost = await db.query('INSERT INTO reports (title, context, created_by, created_on, type, status, image_source, lat, lon) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *', [title, context, user_id, createdOn.rows[0].now, type, status, imageUrl, coordinates[0].latitude, coordinates[0].longitude]);
 
         return res.json({
             status: "success",
