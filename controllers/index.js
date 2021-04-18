@@ -131,10 +131,7 @@ let postReport = async (req, res, next) => {
     try {
         let { user_id, title, context, type, imageBase64, status, address } = req.body;
 
-        let coordinates = await geoloc.geocode({
-            address,
-            country: "Nigeria"
-        });
+        let coordinates = await geoloc.geocode(address);
         let uploadResponse = await cloudinary.uploader.upload(imageBase64, { upload_preset: "ireporter" });
         let imageUrl = uploadResponse.secure_url;
         let createdOn = await db.query('SELECT NOW()');
