@@ -313,7 +313,27 @@ let getUserReports = async (req, res, next) => {
     }
 }
 
+let postComment = async (req, res, next) => {
+    try {
+        let { comment, author_id, report_id } = req.body;
+
+        // let createdOn = await db.query('SELECT NOW()');
+        let commentPost = await db.query('INSERT INTO comments (comment, author_id, report_id) VALUES ($1, $2, $3) RETURNING *', [comment, author_id, report_id]);
+
+        return res.json({
+            status: "success",
+            data: {
+                message: "Comment successfully added" 
+            }
+        })
+    }
+    catch (e) {
+        return next(e);
+    }
+}
+
+
 
 module.exports = {
-    getUsers, register, login, postReport, getAllReports, getReport, deleteReport, editReport, getUserReports
+    getUsers, register, login, postReport, getAllReports, getReport, deleteReport, editReport, getUserReports, postComment
 };

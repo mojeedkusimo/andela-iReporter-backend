@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { getUsers, register, login, postReport, getAllReports, getReport, deleteReport, editReport, getUserReports } = require("../controllers");
+const { getUsers, register, login, postReport, getAllReports, getReport, deleteReport, editReport, getUserReports, postComment } = require("../controllers");
 
 router.get("/users", getUsers)
       .get("/all-reports", getAllReports)
@@ -8,6 +8,7 @@ router.get("/users", getUsers)
       .patch("/view-report/:id", editReport)
       .post("/auth/register", register)
       .post("/new-report", postReport)
+      .post("/new-comment", postComment)
       .post("/auth/login", login)
       .delete("/view-report/:id", deleteReport);
 
