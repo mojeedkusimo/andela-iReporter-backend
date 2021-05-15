@@ -239,14 +239,14 @@ let editReport = async (req, res, next) => {
                 to: `${userObj.email}, mkusimo90@gmail.com`,
                 subject: "Status Update from iReporter",
                 text: `Dear ${userObj.firstname},
-                    This is to notify you that your report on ${userObj.title} has been updated to ${userObj.status}.
+                    This is to notify you that the status of your report on ${userObj.title} has been updated to ${userObj.status}.
                     Thank you for using our platform, we shall keep you updated.
 
                     Best regards,
                     Mojeed A. Kusimo.
                 `,
                 html: `<h3>Dear ${userObj.firstname},</h3>
-                <p>This is to notify you that your report on <b><i>${userObj.title}</i></b> has been updated to <b><i>${userObj.status}</i></b>.</p>
+                <p>This is to notify you that the status of your report on <b><i>${userObj.title}</i></b> has been updated to <b><i>${userObj.status}</i></b>.</p>
                 <p>Thank you for using our platform, we shall keep you updated.</p>
 
                 <p>Best regards,</p>
@@ -317,8 +317,48 @@ let postComment = async (req, res, next) => {
     try {
         let { comment, author_id, report_id } = req.body;
 
-        // let createdOn = await db.query('SELECT NOW()');
-        let commentPost = await db.query('INSERT INTO comments (comment, author_id, report_id) VALUES ($1, $2, $3) RETURNING *', [comment, author_id, report_id]);
+        let createdOn = await db.query('SELECT NOW()');
+        let commentAuthorFirstname = await db.query('SELECT firstname FROM users WHERE id=$1',[author_id]);
+        let userArticleInfo = await db.query("SELECT u.firstname, u.email, r.title, r.status FROM users u JOIN reports r ON u.id = r.created_by WHERE r.id=$1", [report_id]);
+        let authorOfArticle = userArticleInfo.rows[0];
+
+        await db.query('INSERT INTO comments (comment, author_id, report_id) VALUES ($1, $2, $3) RETURNING *', [comment, author_id, report_id]);
+        await db.query("UPDATE reports SET created_on=$1 WHERE id=$2", [ createdOn.rows[0].now, report_id ]);
+
+
+        let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 465, // or 587
+            secure: true, // or false for 587
+            auth: {
+                user: process.env.FULLNAME,
+                pass: process.env.PHONE_NUMBER
+            },
+          });
+
+        let info = await transporter.sendMail({
+        from: '"Mojeed Kusimo" <mkusimo90@gmail.com>',
+        to: `${authorOfArticle.email}`,
+        subject: "Comment Notification from iReporter",
+        text: `Dear ${authorOfArticle.firstname},
+            This is to notify you that ${commentAuthorFirstname.rows[0].firstname} commented on your report: ${authorOfArticle.title}. Kindly check your dashboard to view.
+
+            Thank you for using our platform, we shall keep you updated.
+
+            Best regards,
+            Mojeed A. Kusimo.
+        `,
+        html: `<h3>Dear ${authorOfArticle.firstname},</h3>
+        <p>This is to notify you that <b><i>${commentAuthorFirstname.rows[0].firstname}</i></b> commented on your report: <b><i>${authorOfArticle.title}</i></b>. Kindly check your dashboard to view.
+
+        <p>Thank you for using our platform, we shall keep you updated.</p>
+
+        <p>Best regards,</p>
+        <h3><b>Mojeed A. Kusimo.</b></h3>
+        <h3><b>Softare Developer, iReporter</b></h3>
+        `,
+        });
+
 
         return res.json({
             status: "success",
@@ -333,7 +373,24 @@ let postComment = async (req, res, next) => {
 }
 
 
+let getComments = async (req, res, next) => {
+    try {
+        let comment = await db.query("SELECT u.firstname, c.comment FROM comments c JOIN users u ON u.id=author_id WHERE report_id=$1", [req.params.id]);
+
+
+        return res.json({
+            status: "success",
+            data: {
+                message: comment.rows
+            }
+        });
+    }
+    catch (e) {
+        return next(e);
+    }
+}
+
 
 module.exports = {
-    getUsers, register, login, postReport, getAllReports, getReport, deleteReport, editReport, getUserReports, postComment
+    getUsers, register, login, postReport, getAllReports, getReport, deleteReport, editReport, getUserReports, postComment, getComments
 };
