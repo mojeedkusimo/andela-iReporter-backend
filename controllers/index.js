@@ -50,8 +50,8 @@ let register = async (req, res, next) => {
           });
     
           let info = await transporter.sendMail({
-            from: '"Mojeed Kusimo" <mkusimo90@gmail.com>',
-            to: `${email}, mkusimo90@gmail.com`,
+            from: '"iREPORTER"',
+            to: `${email}`,
             subject: "Welcome to iReporter Platform",
             text: `Hi ${firstname},
                     Thank you for creating an account on the iReporter Platform.
@@ -235,8 +235,8 @@ let editReport = async (req, res, next) => {
               });
         
               let info = await transporter.sendMail({
-                from: '"Mojeed Kusimo" <mkusimo90@gmail.com>',
-                to: `${userObj.email}, mkusimo90@gmail.com`,
+                from: '"iREPORTER"',
+                to: `${userObj.email}`,
                 subject: "Status Update from iReporter",
                 text: `Dear ${userObj.firstname},
                     This is to notify you that the status of your report on ${userObj.title} has been updated to ${userObj.status}.
@@ -337,7 +337,7 @@ let postComment = async (req, res, next) => {
           });
 
         let info = await transporter.sendMail({
-        from: '"Mojeed Kusimo" <mkusimo90@gmail.com>',
+        from: '"iREPORTER"',
         to: `${authorOfArticle.email}`,
         subject: "Comment Notification from iReporter",
         text: `Dear ${authorOfArticle.firstname},
