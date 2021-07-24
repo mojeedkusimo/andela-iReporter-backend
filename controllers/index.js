@@ -50,7 +50,7 @@ let register = async (req, res, next) => {
           });
     
           let info = await transporter.sendMail({
-            from: '"iREPORTER" <ireportergroup@gmail.com>',
+            from: '"iReporter" <ireportergroup@gmail.com>',
             to: `${email}`,
             subject: "Welcome to iReporter Platform",
             text: `Hi ${firstname},
@@ -65,7 +65,7 @@ let register = async (req, res, next) => {
             <p>Thank you for creating an account on the iReporter Platform.</p>
             <p>Click the link below to login to your account:</p>
             <p><a href='https://andela-ireporter-frontend.herokuapp.com/login'>Login here!</a></p>
-            
+
             <p>With Love,</p>
             <h3><b>From</b></h3>
             <h3><b>iReporter Team</b></h3>
@@ -236,7 +236,7 @@ let editReport = async (req, res, next) => {
               });
         
               let info = await transporter.sendMail({
-                from: '"iREPORTER" <ireportergroup@gmail.com>',
+                from: '"iReporter" <ireportergroup@gmail.com>',
                 to: `${userObj.email}`,
                 subject: "Status Update from iReporter",
                 text: `Dear ${userObj.firstname},
@@ -338,7 +338,7 @@ let postComment = async (req, res, next) => {
           });
 
         let info = await transporter.sendMail({
-        from: '"iREPORTER" <ireportergroup@gmail.com>',
+        from: '"iReporter" <ireportergroup@gmail.com>',
         to: `${authorOfArticle.email}`,
         subject: "Comment Notification from iReporter",
         text: `Dear ${authorOfArticle.firstname},
