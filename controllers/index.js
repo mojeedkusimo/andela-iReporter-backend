@@ -50,7 +50,7 @@ let register = async (req, res, next) => {
           });
     
           let info = await transporter.sendMail({
-            from: '"iREPORTER"',
+            from: '"iREPORTER" <ireportergroup@gmail.com>',
             to: `${email}`,
             subject: "Welcome to iReporter Platform",
             text: `Hi ${firstname},
@@ -65,9 +65,10 @@ let register = async (req, res, next) => {
             <p>Thank you for creating an account on the iReporter Platform.</p>
             <p>Click the link below to login to your account:</p>
             <p><a href='https://andela-ireporter-frontend.herokuapp.com/login'>Login here!</a></p>
-            <p>Best regards,</p>
-            <h3><b>Mojeed A. Kusimo.</b></h3>
-            <h3><b>Softare Developer, iReporter</b></h3>
+            
+            <p>With Love,</p>
+            <h3><b>From</b></h3>
+            <h3><b>iReporter Team</b></h3>
             `,
           });
     
@@ -235,7 +236,7 @@ let editReport = async (req, res, next) => {
               });
         
               let info = await transporter.sendMail({
-                from: '"iREPORTER"',
+                from: '"iREPORTER" <ireportergroup@gmail.com>',
                 to: `${userObj.email}`,
                 subject: "Status Update from iReporter",
                 text: `Dear ${userObj.firstname},
@@ -249,9 +250,9 @@ let editReport = async (req, res, next) => {
                 <p>This is to notify you that the status of your report on <b><i>${userObj.title}</i></b> has been updated to <b><i>${userObj.status}</i></b>.</p>
                 <p>Thank you for using our platform, we shall keep you updated.</p>
 
-                <p>Best regards,</p>
-                <h3><b>Mojeed A. Kusimo.</b></h3>
-                <h3><b>Softare Developer, iReporter</b></h3>
+                <p>With Love,</p>
+                <h3><b>From</b></h3>
+                <h3><b>iReporter Team</b></h3>
                 `,
               });
             //   let messagebird = require('messagebird')(SMS_API_KEY);
@@ -337,7 +338,7 @@ let postComment = async (req, res, next) => {
           });
 
         let info = await transporter.sendMail({
-        from: '"iREPORTER"',
+        from: '"iREPORTER" <ireportergroup@gmail.com>',
         to: `${authorOfArticle.email}`,
         subject: "Comment Notification from iReporter",
         text: `Dear ${authorOfArticle.firstname},
@@ -353,9 +354,9 @@ let postComment = async (req, res, next) => {
 
         <p>Thank you for using our platform, we shall keep you updated.</p>
 
-        <p>Best regards,</p>
-        <h3><b>Mojeed A. Kusimo.</b></h3>
-        <h3><b>Softare Developer, iReporter</b></h3>
+        <p>With Love,</p>
+        <h3><b>From</b></h3>
+        <h3><b>iReporter Team</b></h3>
         `,
         });
 
