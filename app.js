@@ -19,13 +19,13 @@ app.use("/api", router);
 
 app.use((req, res, next) => {
     let error = new Error("Page Not Found");
-    res.status = 404;
+    error.status = 404; 
 
     return next(error);
 })
 
 app.use((err, req, res, next) => {
-    res.status = err.status || 500;
+    res.status(err.status || 500);
 
     return res.json({
         status: "error",
